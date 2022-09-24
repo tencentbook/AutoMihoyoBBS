@@ -35,7 +35,8 @@ class Genshin:
 
     # 判断签到
     def is_sign(self, region: str, uid: str) -> dict:
-        req = http.get(setting.genshin_Is_signurl.format(setting.genshin_Act_id, region, uid), headers=self.headers)
+        req = http.get(setting.genshin_Is_signurl.format(
+            setting.genshin_Act_id, region, uid), headers=self.headers)
         data = req.json()
         if data["retcode"] != 0:
             log.warning("获取账号签到信息失败！")
@@ -45,11 +46,30 @@ class Genshin:
             raise CookieError("BBS Cookie Errror")
         return data["data"]
 
+    def get_validate(self, gt, challenge):
+        header = {"Accept": "*/*",
+                  "X-Requested-With": "com.mihoyo.hyperion",
+                  "User-Agent: ": tools.get_useragent(),
+                  "Referer:": "https://webstatic.mihoyo.com/",
+                  "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
+                  }
+        validate = ""
+        req = http.get(
+            f"https://api.geetest.com/ajax.php?gt={gt}&challenge={challenge}&lang=zh-cn&pt=3&client_type=web_mobile&callback=geetest_1663984420850",
+            headers=header)
+        if req.status_code == 200:
+            data = req.json()
+            if "success" in data["status"] and "success" in data["data"]["result"]:
+                validate = data["data"]["validate"]
+        return validate
+
     def check_in(self, account):
+        header = {}
+        header.update(self.headers)
         for i in range(4):
             if i != 0:
                 log.info(f'触发验证码，即将进行第{i}次重试，最多3次')
-            req = http.post(url=setting.genshin_Signurl, headers=self.headers,
+            req = http.post(url=setting.genshin_Signurl, headers=header,
                             json={'act_id': setting.genshin_Act_id, 'region': account[2], 'uid': account[1]})
             if req.status_code == 429:
                 time.sleep(10)  # 429同ip请求次数过多，尝试sleep10s进行解决
@@ -57,6 +77,12 @@ class Genshin:
                 continue
             data = req.json()
             if data["retcode"] == 0 and data["data"]["success"] == 1:
+                log.error("出现验证码")
+                validate = self.get_validate(data["data"]["gt"], data["data"]["challenge"])
+                if validate != "":
+                    header["x-rpc-challenge"] = data["data"]["challenge"]
+                    header["x-rpc-validate"] = validate
+                    header["x-rpc-seccode"] = f'{validate}|jordan'
                 time.sleep(random.randint(6, 15))
             else:
                 break
@@ -78,7 +104,8 @@ class Genshin:
                     sign_days = is_data["total_sign_day"] - 1
                     ok = True
                     if is_data["is_sign"]:
-                        log.info(f"旅行者{i[0]}今天已经签到过了~\r\n今天获得的奖励是{tools.get_item(self.checkin_rewards[sign_days])}")
+                        log.info(
+                            f"旅行者{i[0]}今天已经签到过了~\r\n今天获得的奖励是{tools.get_item(self.checkin_rewards[sign_days])}")
                         sign_days += 1
                     else:
                         time.sleep(random.randint(2, 8))
