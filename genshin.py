@@ -49,8 +49,8 @@ class Genshin:
     def get_validate(self, gt, challenge):
         header = {"Accept": "*/*",
                   "X-Requested-With": "com.mihoyo.hyperion",
-                  "User-Agent: ": tools.get_useragent(),
-                  "Referer:": "https://webstatic.mihoyo.com/",
+                  "User-Agent": tools.get_useragent(),
+                  "Referer": "https://webstatic.mihoyo.com/",
                   "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"
                   }
         validate = ""
