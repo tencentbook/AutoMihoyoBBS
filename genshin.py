@@ -55,7 +55,7 @@ class Genshin:
                   }
         validate = ""
         req = http.get(
-            f"https://api.geetest.com/ajax.php?gt={gt}&challenge={challenge}&lang=zh-cn&pt=3&client_type=web_mobile&callback=geetest_1663984420850",
+            f"https://api.geetest.com/ajax.php?gt={gt}&challenge={challenge}&lang=zh-cn&pt=3&client_type=web_mobile",
             headers=header)
         print(req.text)
         if req.status_code == 200:
