@@ -57,6 +57,7 @@ class Genshin:
         req = http.get(
             f"https://api.geetest.com/ajax.php?gt={gt}&challenge={challenge}&lang=zh-cn&pt=3&client_type=web_mobile&callback=geetest_1663984420850",
             headers=header)
+        print(req.text)
         if req.status_code == 200:
             data = req.json()
             if "success" in data["status"] and "success" in data["data"]["result"]:
