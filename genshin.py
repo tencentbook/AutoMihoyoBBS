@@ -1,3 +1,4 @@
+import json
 import time
 import tools
 import config
@@ -59,7 +60,7 @@ class Genshin:
             headers=header)
         print(req.text)
         if req.status_code == 200:
-            data = req.json()
+            data = json.loads(req.text.replace("(", "").replace(")", ""))
             if "success" in data["status"] and "success" in data["data"]["result"]:
                 validate = data["data"]["validate"]
         return validate
