@@ -32,10 +32,13 @@ def main():
     def sign():
         log.info("Starting signing")
         multi = env["MULTI"].upper()
-        if multi == 'TRUE':
-            os.system("python3 ./main_multi.py autorun")
-        else:
-            os.system("python3 ./main.py")
+        try:
+            if multi == 'TRUE':
+                os.system("python3 ./main_multi.py autorun")
+            else:
+                os.system("python3 ./main.py")
+        except Exception as e:
+            log.error(f"An error occurred during signing: {str(e)}")
 
     sign()
     next_run_time()
